@@ -839,9 +839,14 @@ const DigitalMenu: React.FC<Props> = ({ storeId, products, categories: externalC
 
                         {payment === 'CASHBACK' && customerPoints < finalTotal && (
                            <div className="space-y-4 pt-4 border-t border-gray-100 animate-scale-up">
-                               <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
-                                 Completar pagamento com (Falta R$ {(finalTotal - customerPoints).toFixed(2)})
-                               </p>
+                               <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-2 shadow-sm">
+                                 <p className="text-lg md:text-xl font-black text-red-600 uppercase tracking-widest text-center">
+                                   Falta pagar: R$ {(finalTotal - customerPoints).toFixed(2)}
+                                 </p>
+                                 <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest text-center mt-1">
+                                   Selecione como deseja completar o pagamento
+                                 </p>
+                               </div>
                                <div className="grid grid-cols-3 gap-2">
                                   {[
                                     {id: 'PIX', icon: <DollarSign size={18}/>, label: 'PIX'},

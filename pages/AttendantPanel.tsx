@@ -459,7 +459,7 @@ const AttendantPanel: React.FC<Props> = ({ adminUser, onSelectTable, orders, set
                           onClick={() => handleGroupStatusUpdate(order.originalIds, 'PREPARANDO')} 
                           className="flex-1 py-3.5 bg-orange-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
-                          {isUpdating === order.id ? <Loader2 className="animate-spin" size={14} /> : 'ENVIAR P/ COZINHA'}
+                          {isUpdating === order.id ? <Loader2 className="animate-spin" size={14} /> : 'MANDAR P/ PRODUÇÃO'}
                         </button>
                         
                         <div className="relative">

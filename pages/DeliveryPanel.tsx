@@ -407,7 +407,7 @@ export default function DeliveryPanel({ storeId, user, settings, storeSlug, onLo
                             
                             return payments.map((p, idx) => {
                                 const isCashback = p.method === 'CASHBACK';
-                                const colorClass = isCashback ? 'text-purple-600 bg-purple-100' : 'text-red-600 bg-red-100';
+                                const colorClass = isCashback ? 'text-purple-600 bg-purple-100 text-[10px] px-2 py-0.5' : 'text-red-700 bg-red-100 text-sm md:text-base px-3 py-1 border border-red-200 shadow-sm';
                                 
                                 let methodLabel = p.method;
                                 if (p.method === 'A_PAGAR') methodLabel = 'Pagar na Entrega';
@@ -418,11 +418,11 @@ export default function DeliveryPanel({ storeId, user, settings, storeSlug, onLo
                                 
                                 return (
                                     <div key={idx} className="flex flex-col">
-                                        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded mt-1 inline-block w-max mr-1 ${colorClass}`}>
+                                        <span className={`font-black uppercase rounded mt-1 inline-block w-max mr-1 ${colorClass}`}>
                                             {label}: {formatCurrency(p.amount)}
                                         </span>
                                         {p.method === 'DINHEIRO' && order.changeFor && order.changeFor > 0 && (
-                                            <span className="text-[10px] font-bold text-orange-600 uppercase bg-orange-100 px-2 py-0.5 rounded mt-1 inline-block w-max">
+                                            <span className="text-sm font-black text-orange-700 uppercase bg-orange-100 border border-orange-200 shadow-sm px-3 py-1 rounded mt-1 inline-block w-max">
                                                 Troco para: {formatCurrency(order.changeFor)} (Devolver: {formatCurrency(order.changeFor - p.amount)})
                                             </span>
                                         )}

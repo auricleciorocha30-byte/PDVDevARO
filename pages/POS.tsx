@@ -1071,14 +1071,18 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
     let num = commandNumber;
     let currentType = orderType;
     
-    if (currentType === 'MESA' || currentType === 'COMANDA') {
+    if (currentType === 'BALCAO') {
+        num = prompt("Digite o número da comanda para lançar os itens:") || '';
+        if (!num) return;
+        setCommandNumber(num);
+        currentType = 'COMANDA';
+        setOrderType('COMANDA');
+    } else if (currentType === 'MESA' || currentType === 'COMANDA') {
         if (!num) {
             num = prompt("Digite o número da comanda/mesa para lançar os itens:") || '';
             if (!num) return;
             setCommandNumber(num);
         }
-    } else if (currentType === 'BALCAO') {
-        // Balcão doesn't need a number, but we can generate a display ID later
     }
     
     setIsProcessing(true);
@@ -2418,10 +2422,10 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
             <p className="text-sm text-gray-500 mb-4">{weightModal.product.name}</p>
             <div className="relative mb-6">
                 <input 
-                    type="number" 
-                    step="1"
+                    type="text" 
+                    inputMode="decimal"
                     value={weightInput}
-                    onChange={(e) => setWeightInput(e.target.value)}
+                    onChange={(e) => setWeightInput(e.target.value.replace(/[^0-9.,]/g, ''))}
                     className="w-full p-4 bg-gray-50 rounded-xl border border-gray-200 text-2xl font-bold text-center outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="0"
                     autoFocus
@@ -2432,7 +2436,7 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
                 <button onClick={() => setWeightModal({ isOpen: false, product: null })} className="flex-1 py-3 bg-gray-100 rounded-xl font-bold text-gray-600">Cancelar</button>
                 <button 
                     onClick={() => {
-                        const weight = parseFloat(weightInput);
+                        const weight = parseFloat(weightInput.replace(',', '.'));
                         if (weight > 0) addToCart(weightModal.product!, weight / 1000);
                     }}
                     className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-bold"
