@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Product, StoreSettings, Order, OrderItem, OrderType, PaymentMethod, Waitstaff } from '../types';
+import InstallPrompt from '../components/InstallPrompt';
 
 interface Props {
   storeId?: string;
@@ -596,6 +597,7 @@ const DigitalMenu: React.FC<Props> = ({ storeId, products, categories: externalC
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <InstallPrompt />
             <button onClick={() => setIsInfoOpen(true)} className="p-2.5 bg-white/10 rounded-full shrink-0 active:scale-90 transition-transform"><Info size={20} /></button>
             <button onClick={() => { setIsCartOpen(true); setCheckoutStep('cart'); }} className="relative p-2.5 bg-white/10 rounded-full shrink-0 active:scale-90 transition-transform">
               <ShoppingCart size={20} />

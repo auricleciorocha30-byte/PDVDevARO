@@ -44,6 +44,10 @@ export default function LoginPage({ onLoginSuccess }: Props) {
       setView('login');
       setIntendedDestination('/entregas');
     }
+    if (searchParams.get('role') === 'atendente') {
+      setView('login');
+      setIntendedDestination('/atendimento');
+    }
   }, [searchParams]);
 
   const [intendedDestination, setIntendedDestination] = useState<string | null>(null);

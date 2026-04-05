@@ -26,13 +26,36 @@
         }
 
         const isDelivery = urlParams.get('role') === 'entregador' || hash.includes('role=entregador') || hash.includes('/entregas');
+        const isAttendant = urlParams.get('role') === 'atendente' || hash.includes('role=atendente') || hash.includes('/atendimento');
+        const isMenu = hash.includes('/cardapio');
         
+        let shouldGenerateManifest = false;
+        let appName = "G&C Staff";
+        let shortName = "G&C";
+        let startUrl = "/";
+
         if (isDelivery) {
-          const startUrl = `/#/login?role=entregador${loja ? '&loja=' + loja : ''}`;
+          appName = loja ? `Entregas - ${loja}` : "Entregas DevARO";
+          shortName = "Entregas";
+          startUrl = `/#/entregas${loja ? '?loja=' + loja : ''}`;
+          shouldGenerateManifest = true;
+        } else if (isAttendant) {
+          appName = loja ? `Colaborador - ${loja}` : "Portal Colaborador";
+          shortName = "Colaborador";
+          startUrl = `/#/atendimento${loja ? '?loja=' + loja : ''}`;
+          shouldGenerateManifest = true;
+        } else if (isMenu) {
+          appName = loja ? `Cardápio - ${loja}` : "Cardápio Digital";
+          shortName = "Cardápio";
+          startUrl = `/#/cardapio${loja ? '?loja=' + loja : ''}`;
+          shouldGenerateManifest = true;
+        }
+        
+        if (shouldGenerateManifest) {
           const manifest = {
-            "name": "Entregas DevARO",
-            "short_name": "Entregas",
-            "description": "Portal do Entregador DevARO",
+            "name": appName,
+            "short_name": shortName,
+            "description": appName,
             "start_url": startUrl,
             "display": "standalone",
             "background_color": "#ffffff",
