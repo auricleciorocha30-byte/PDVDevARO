@@ -631,7 +631,7 @@ function StoreContext() {
         adminUser && (adminUser.role === 'ATENDENTE' || adminUser.role === 'GERENTE') ? (
           <AttendantPanel adminUser={adminUser} orders={orders} settings={settings} onSelectTable={setActiveTable} updateStatus={updateOrderStatus} onLogout={() => handleSetUser(null)} />
         ) : (
-          <Navigate to={loginRedirect} replace />
+          <Navigate to={`/login${lojaParam}${lojaParam ? '&' : '?'}role=atendente`} replace />
         )
       } />
       <Route path="/cozinha" element={<KitchenBoard orders={orders} updateStatus={updateOrderStatus} />} />

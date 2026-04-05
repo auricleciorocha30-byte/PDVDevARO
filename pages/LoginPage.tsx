@@ -198,6 +198,10 @@ export default function LoginPage({ onLoginSuccess }: Props) {
           const newSearchParams = new URLSearchParams(searchParams);
           newSearchParams.set('role', 'entregador');
           navigate({ search: newSearchParams.toString() }, { replace: true });
+        } else if (target === '/atendimento') {
+          const newSearchParams = new URLSearchParams(searchParams);
+          newSearchParams.set('role', 'atendente');
+          navigate({ search: newSearchParams.toString() }, { replace: true });
         }
       }
     } else {
