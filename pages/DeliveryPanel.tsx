@@ -30,6 +30,8 @@ export default function DeliveryPanel({ storeId, user, settings, storeSlug, onLo
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'available' | 'mine' | 'history' | 'all'>('mine');
   const [couriers, setCouriers] = useState<Waitstaff[]>([]);
+  const [showBulkFinalizeModal, setShowBulkFinalizeModal] = useState(false);
+  const [bulkDeliveries, setBulkDeliveries] = useState<Order[]>([]);
 
   useEffect(() => {
     if (user.role === 'GERENTE') {
@@ -183,6 +185,35 @@ export default function DeliveryPanel({ storeId, user, settings, storeSlug, onLo
         window.open(`https://www.google.com/maps/search/?api=1&query=${encoded}`, '_blank');
     };
 
+    const startBulkRoute = () => {
+        const outForDelivery = myDeliveries.filter(o => o.status === 'SAIU_PARA_ENTREGA');
+        if (outForDelivery.length < 2) return;
+
+        const destinations = outForDelivery.map(o => o.deliveryAddress).filter(Boolean) as string[];
+        if (destinations.length > 0) {
+            const destination = encodeURIComponent(destinations[destinations.length - 1]);
+            const waypoints = destinations.slice(0, -1).map(d => encodeURIComponent(d)).join('%7C');
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${destination}&waypoints=${waypoints}`;
+            window.open(url, '_blank');
+        }
+
+        setBulkDeliveries(outForDelivery);
+        setShowBulkFinalizeModal(true);
+    };
+
+    const finalizeBulk = async () => {
+        setLoading(true);
+        for (const order of bulkDeliveries) {
+            await supabase
+                .from('orders')
+                .eq('id', order.id)
+                .update({ status: 'ENTREGUE' });
+        }
+        setShowBulkFinalizeModal(false);
+        fetchDeliveries();
+        fetchWeeklyCount();
+    };
+
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
@@ -293,8 +324,18 @@ export default function DeliveryPanel({ storeId, user, settings, storeSlug, onLo
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {displayedDeliveries.map(order => {
+          <>
+            {activeTab === 'mine' && myDeliveries.filter(o => o.status === 'SAIU_PARA_ENTREGA').length > 1 && (
+                <button 
+                    onClick={startBulkRoute}
+                    className="w-full mb-4 py-4 bg-purple-600 text-white rounded-xl font-bold shadow-lg hover:bg-purple-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                    <Navigation size={20} />
+                    Iniciar Rota Múltipla ({myDeliveries.filter(o => o.status === 'SAIU_PARA_ENTREGA').length} destinos)
+                </button>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {displayedDeliveries.map(order => {
               const isReady = order.status === 'ENVIADO_PARA_ENTREGA';
               const isPreparing = order.status === 'PREPARANDO';
               const isWaiting = order.status === 'AGUARDANDO';
@@ -525,8 +566,39 @@ export default function DeliveryPanel({ storeId, user, settings, storeSlug, onLo
               );
             })}
           </div>
+          </>
         )}
       </div>
+
+      {showBulkFinalizeModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl animate-scale-up">
+                <div className="flex justify-center mb-4">
+                    <div className="p-4 bg-green-100 rounded-full text-green-600">
+                        <CheckCircle2 size={48} />
+                    </div>
+                </div>
+                <h3 className="text-2xl font-black text-center text-gray-800 mb-2">Deu tudo certo?</h3>
+                <p className="text-center text-gray-500 mb-6 font-medium">
+                    Você abriu a rota para {bulkDeliveries.length} destinos. Deseja finalizar todas essas entregas de uma vez?
+                </p>
+                <div className="space-y-3">
+                    <button 
+                        onClick={finalizeBulk}
+                        className="w-full py-4 bg-green-600 text-white rounded-xl font-bold shadow-lg hover:bg-green-700 active:scale-95 transition-all text-lg"
+                    >
+                        Sim, finalizar todas
+                    </button>
+                    <button 
+                        onClick={() => setShowBulkFinalizeModal(false)}
+                        className="w-full py-4 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 active:scale-95 transition-all"
+                    >
+                        Não, finalizar manualmente
+                    </button>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 }
