@@ -221,35 +221,6 @@ const WaitstaffManagement: React.FC<Props> = ({ currentStore, settings, onUpdate
           </div>
         </section>
       </div>
-
-      <section className="bg-primary p-8 rounded-[2.5rem] shadow-xl text-white">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="p-3 bg-orange-500 rounded-2xl text-white shadow-lg">
-            <Printer size={28} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">Impressão Térmica</h2>
-            <p className="text-sm text-orange-200">Configurações para cupons ESC/POS.</p>
-          </div>
-        </div>
-        <div className="bg-white/5 rounded-3xl p-6 border border-white/10 flex items-center justify-between">
-          <div>
-            <p className="font-bold">Largura do Papel</p>
-            <p className="text-xs text-gray-400">Otimizado para impressoras térmicas padrão</p>
-          </div>
-          <div className="flex bg-white/10 p-1 rounded-xl">
-            {(['80mm', '58mm'] as const).map(w => (
-              <button 
-                key={w}
-                onClick={() => onUpdateSettings({...settings, thermalPrinterWidth: w})}
-                className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${settings.thermalPrinterWidth === w ? 'bg-orange-500 text-white' : 'text-gray-400'}`}
-              >
-                {w}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

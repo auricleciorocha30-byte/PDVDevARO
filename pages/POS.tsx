@@ -46,6 +46,7 @@ interface POSProps {
   settings: StoreSettings;
   onLogout: () => void;
   updateStatus: (id: string, status: OrderStatus) => void;
+  isOffline?: boolean;
 }
 
 interface Payment {
@@ -53,7 +54,7 @@ interface Payment {
   amount: number;
 }
 
-export default function POS({ storeId, user, settings, onLogout, updateStatus }: POSProps) {
+export default function POS({ storeId, user, settings, onLogout, updateStatus, isOffline }: POSProps) {
   const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [couriers, setCouriers] = useState<Waitstaff[]>([]);
@@ -1100,8 +1101,8 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
             stockDeducted: true,
             paymentDetails: loadedPayments.length > 0 ? JSON.stringify(loadedPayments) : undefined,
             paymentMethod: loadedPayments.length > 1 ? 'MISTO' : (loadedPayments.length === 1 ? loadedPayments[0].method : undefined),
-            customerName: (currentType === 'ENTREGA' || currentType === 'BALCAO') ? deliveryDetails.customerName : undefined,
-            customerPhone: (currentType === 'ENTREGA' || currentType === 'BALCAO') ? deliveryDetails.customerPhone : undefined,
+            customerName: currentType === 'ENTREGA' ? deliveryDetails.customerName : undefined,
+            customerPhone: currentType === 'ENTREGA' ? deliveryDetails.customerPhone : undefined,
             deliveryAddress: currentType === 'ENTREGA' ? deliveryDetails.address : undefined,
             originAddress: currentType === 'ENTREGA' ? (deliveryDetails.useStoreOrigin ? settings.address : deliveryDetails.originAddress) : undefined,
             referencePoint: currentType === 'ENTREGA' ? deliveryDetails.referencePoint : undefined,
@@ -1745,8 +1746,10 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
       }
     }
 
+    const printWidth = settings.printWidthPx ? `${settings.printWidthPx}px` : (settings.thermalPrinterWidth === '58mm' ? '180px' : '280px');
+    const winWidth = settings.printWidthPx ? settings.printWidthPx + 50 : (settings.thermalPrinterWidth === '58mm' ? 300 : 400);
     const content = `
-      <div style="font-family: 'Courier New', Courier, monospace; width: 180px; padding-right: 5px; font-size: 14px; font-weight: 900; color: black !important; line-height: 1.1; letter-spacing: -0.5px; -webkit-print-color-adjust: exact;">
+      <div style="font-family: 'Courier New', Courier, monospace; width: ${printWidth}; padding-right: 5px; font-size: 14px; font-weight: 900; color: black !important; line-height: 1.1; letter-spacing: -0.5px; -webkit-print-color-adjust: exact;">
         <h2 style="text-align: center; margin: 0; font-size: 16px; font-weight: 900; color: black !important;">${settings.storeName}</h2>
         ${settings.cnpj ? `<p style="text-align: center; margin: 0 0 5px 0; font-size: 12px; color: black !important;">CNPJ: ${settings.cnpj}</p>` : ''}
         <p style="margin: 2px 0; color: black !important;">Data: ${new Date(order.createdAt).toLocaleString()}</p>
@@ -1806,7 +1809,7 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
       </div>
     `;
 
-    const win = window.open('', '', 'width=300,height=600');
+    const win = window.open('', '', `width=${winWidth},height=600`);
     if (win) {
       win.document.write(`
         <html>
@@ -1835,8 +1838,10 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
   const printBudget = () => {
     if (cart.length === 0) return;
     
+    const printWidth = settings.printWidthPx ? `${settings.printWidthPx}px` : (settings.thermalPrinterWidth === '58mm' ? '180px' : '280px');
+    const winWidth = settings.printWidthPx ? settings.printWidthPx + 50 : (settings.thermalPrinterWidth === '58mm' ? 300 : 400);
     const content = `
-    <div style="font-family: monospace; width: 180px; padding-right: 5px; font-size: 14px; font-weight: 900; color: black !important; line-height: 1.1; -webkit-print-color-adjust: exact;">
+    <div style="font-family: monospace; width: ${printWidth}; padding-right: 5px; font-size: 14px; font-weight: 900; color: black !important; line-height: 1.1; -webkit-print-color-adjust: exact;">
       <h2 style="text-align: center; margin: 0; font-size: 16px; font-weight: 900; color: black !important;">ORCAMENTO</h2>
       <p style="text-align: center; margin: 0 0 10px 0; color: black !important;">${settings.storeName}</p>
       <p style="margin: 2px 0; color: black !important;">Data: ${new Date().toLocaleString()}</p>
@@ -1863,7 +1868,7 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
     </div>
     `;
 
-    const win = window.open('', '', 'width=300,height=600');
+    const win = window.open('', '', `width=${winWidth},height=600`);
     if (win) {
       win.document.write(`
         <html>
@@ -1894,9 +1899,11 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
       
       const initial = currentSession?.initial_amount || 0;
       const totalInBox = dailySales.total + initial - dailySales.bleeds;
+      const printWidth = settings.printWidthPx ? `${settings.printWidthPx}px` : (settings.thermalPrinterWidth === '58mm' ? '180px' : '280px');
+      const winWidth = settings.printWidthPx ? settings.printWidthPx + 50 : (settings.thermalPrinterWidth === '58mm' ? 300 : 400);
 
       const content = `
-      <div style="font-family: monospace; width: 180px; padding-right: 5px; font-size: 14px; font-weight: 900; color: black !important; line-height: 1.1; -webkit-print-color-adjust: exact;">
+      <div style="font-family: monospace; width: ${printWidth}; padding-right: 5px; font-size: 14px; font-weight: 900; color: black !important; line-height: 1.1; -webkit-print-color-adjust: exact;">
         <h2 style="text-align: center; margin: 0; font-size: 16px; font-weight: 900; color: black !important;">FECHAMENTO CAIXA</h2>
         <p style="text-align: center; margin: 0 0 10px 0; color: black !important;">${settings.storeName}</p>
         <p style="margin: 2px 0; color: black !important;">Data: ${new Date().toLocaleString()}</p>
@@ -1936,9 +1943,9 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
         <p style="text-align: center; font-weight: 900; color: black !important;">--- FIM DO RELATORIO ---</p>
         <br /><br />
       </div>
-    `;
+      `;
 
-    const win = window.open('', '', 'width=300,height=600');
+    const win = window.open('', '', `width=${winWidth},height=600`);
     if (win) {
       win.document.write(`
         <html>
@@ -1966,6 +1973,12 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus }:
 
   return (
     <div className="flex flex-col lg:flex-row h-[100dvh] bg-gray-100 overflow-hidden font-sans text-gray-900">
+      {isOffline && (
+          <div className="fixed top-0 left-0 right-0 z-[100] bg-orange-600 text-white py-2 px-4 flex items-center justify-center gap-2 font-bold shadow-lg animate-slide-down">
+              <WifiOff size={20} />
+              <span>MODO CONTINGÊNCIA ATIVO - VOCÊ ESTÁ OFFLINE</span>
+          </div>
+      )}
       {/* Left Side - Products */}
       <div className="flex-1 flex flex-col min-w-0 h-[55dvh] lg:h-full">
         <header 

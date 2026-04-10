@@ -587,30 +587,61 @@ const StoreSettingsPage: React.FC<Props> = ({ settings, products, onSave, storeI
 
           <section className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
             <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 flex items-center gap-2">
-              <Printer size={16} /> Impressora USB
+              <Printer size={16} /> Impressora Térmica
             </h2>
             <div className="space-y-4">
-              <p className="text-xs text-gray-500">
-                Conecte uma impressora térmica USB para impressão direta de cupons.
-              </p>
-              <button 
-                onClick={handleConnectUsbPrinter}
-                className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
-              >
-                <Printer size={18} />
-                {localSettings.usbPrinterVendorId ? 'Alterar Impressora USB' : 'Conectar Impressora USB'}
-              </button>
-              {localSettings.usbPrinterVendorId && (
-                <div className="p-3 bg-green-50 text-green-700 rounded-xl text-xs font-bold flex items-center justify-between">
-                  <span>Impressora Configurada</span>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase ml-2">Largura do Papel (Padrão)</label>
+                <div className="grid grid-cols-2 gap-2">
                   <button 
-                    onClick={() => setLocalSettings(prev => ({...prev, usbPrinterVendorId: undefined, usbPrinterProductId: undefined}))}
-                    className="text-red-500 hover:text-red-700"
+                    onClick={() => setLocalSettings({...localSettings, thermalPrinterWidth: '58mm', printWidthPx: 180})}
+                    className={`py-3 rounded-xl font-bold text-sm transition-all ${localSettings.thermalPrinterWidth === '58mm' ? 'bg-primary text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
                   >
-                    Remover
+                    58mm
+                  </button>
+                  <button 
+                    onClick={() => setLocalSettings({...localSettings, thermalPrinterWidth: '80mm', printWidthPx: 280})}
+                    className={`py-3 rounded-xl font-bold text-sm transition-all ${localSettings.thermalPrinterWidth === '80mm' ? 'bg-primary text-white shadow-lg' : 'bg-gray-50 text-gray-500 hover:bg-gray-100'}`}
+                  >
+                    80mm
                   </button>
                 </div>
-              )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-gray-400 uppercase ml-2">Ajuste Fino de Largura (Pixels)</label>
+                <input 
+                  type="number" 
+                  value={localSettings.printWidthPx || (localSettings.thermalPrinterWidth === '58mm' ? 180 : 280)} 
+                  onChange={(e) => setLocalSettings({...localSettings, printWidthPx: Number(e.target.value)})} 
+                  className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-100 outline-none font-bold text-sm" 
+                />
+                <p className="text-[10px] text-gray-400 ml-2">Diminua este valor (ex: de 200 para 180) se o texto estiver cortando na lateral.</p>
+              </div>
+
+              <div className="pt-4 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-3">
+                  Conecte uma impressora térmica USB para impressão direta de cupons.
+                </p>
+                <button 
+                  onClick={handleConnectUsbPrinter}
+                  className="w-full py-3 bg-blue-50 text-blue-600 rounded-xl font-bold text-sm hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Printer size={18} />
+                  {localSettings.usbPrinterVendorId ? 'Alterar Impressora USB' : 'Conectar Impressora USB'}
+                </button>
+                {localSettings.usbPrinterVendorId && (
+                  <div className="p-3 bg-green-50 text-green-700 rounded-xl text-xs font-bold flex items-center justify-between mt-3">
+                    <span>Impressora Configurada</span>
+                    <button 
+                      onClick={() => setLocalSettings(prev => ({...prev, usbPrinterVendorId: undefined, usbPrinterProductId: undefined}))}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 

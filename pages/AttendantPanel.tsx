@@ -19,7 +19,8 @@ import {
   Lock,
   Tag,
   MoreVertical,
-  MessageCircle
+  MessageCircle,
+  WifiOff
 } from 'lucide-react';
 import { Order, OrderStatus, Waitstaff, StoreSettings } from '../types';
 import { supabase } from '../lib/supabase';
@@ -32,9 +33,10 @@ interface Props {
   settings: StoreSettings;
   updateStatus: (id: string, status: OrderStatus) => Promise<void>;
   onLogout: () => void;
+  isOffline?: boolean;
 }
 
-const AttendantPanel: React.FC<Props> = ({ adminUser, onSelectTable, orders, settings, updateStatus, onLogout }) => {
+const AttendantPanel: React.FC<Props> = ({ adminUser, onSelectTable, orders, settings, updateStatus, onLogout, isOffline }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [selectedTableModal, setSelectedTableModal] = useState<{id: string, type: 'MESA' | 'COMANDA'} | null>(null);
@@ -248,23 +250,31 @@ const AttendantPanel: React.FC<Props> = ({ adminUser, onSelectTable, orders, set
 
   return (
     <div className="min-h-screen bg-primary p-4 md:p-8 relative overflow-x-hidden">
+      {isOffline && (
+          <div className="fixed top-0 left-0 right-0 z-[100] bg-orange-600 text-white py-2 px-4 flex items-center justify-center gap-2 font-bold shadow-lg animate-slide-down">
+              <WifiOff size={20} />
+              <span>MODO CONTINGÊNCIA ATIVO - VOCÊ ESTÁ OFFLINE</span>
+          </div>
+      )}
       <style>{`
         @media print {
           @page { margin: 0; }
           html, body { margin: 0; padding: 0; background: #fff !important; }
           body * { visibility: hidden; }
-          #thermal-receipt-waiter, #thermal-receipt-waiter * { visibility: visible; }
+          #thermal-receipt-waiter, #thermal-receipt-waiter * { visibility: visible; color: black !important; font-weight: 900 !important; }
           #thermal-receipt-waiter { 
             display: block !important; 
             position: absolute; 
             left: 0; 
             top: 0; 
-            width: ${settings.thermalPrinterWidth || '80mm'}; 
+            width: ${settings.printWidthPx ? `${settings.printWidthPx}px` : (settings.thermalPrinterWidth || '80mm')}; 
             padding: 5mm; 
             background: #fff; 
             font-family: 'Courier New', monospace; 
             font-size: 10pt; 
             color: #000;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
         }
       `}</style>

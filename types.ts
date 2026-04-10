@@ -135,6 +135,7 @@ export interface StoreSettings {
   canWaitstaffFinishOrder: boolean;
   canWaitstaffCancelItems: boolean;
   thermalPrinterWidth: '80mm' | '58mm';
+  printWidthPx?: number;
   address?: string;
   whatsapp?: string;
   couponName?: string;

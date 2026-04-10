@@ -629,7 +629,7 @@ function StoreContext() {
     <Routes>
       <Route path="/atendimento" element={
         adminUser && (adminUser.role === 'ATENDENTE' || adminUser.role === 'GERENTE') ? (
-          <AttendantPanel adminUser={adminUser} orders={orders} settings={settings} onSelectTable={setActiveTable} updateStatus={updateOrderStatus} onLogout={() => handleSetUser(null)} />
+          <AttendantPanel adminUser={adminUser} orders={orders} settings={settings} onSelectTable={setActiveTable} updateStatus={updateOrderStatus} onLogout={() => handleSetUser(null)} isOffline={isOffline} />
         ) : (
           <Navigate to={`/login${lojaParam}${lojaParam ? '&' : '?'}role=atendente`} replace />
         )
@@ -648,6 +648,7 @@ function StoreContext() {
             settings={settings}
             onLogout={() => handleSetUser(null)}
             updateStatus={updateOrderStatus}
+            isOffline={isOffline}
           />
         ) : (
           <Navigate to={loginRedirect} replace />
