@@ -648,6 +648,7 @@ const AttendantPanel: React.FC<Props> = ({ adminUser, onSelectTable, orders, set
                 <div style={{ marginTop: '2mm', padding: '2mm', background: '#f0f0f0', border: '1px solid #000' }}>
                     <p style={{ fontSize: '8pt', fontWeight: 'bold' }}>ENTREGA EM:</p>
                     <p style={{ fontSize: '8pt' }}>{printOrder.deliveryAddress.toUpperCase()}</p>
+                    {printOrder.referencePoint && <p style={{ fontSize: '8pt' }}>REF: {printOrder.referencePoint}</p>}
                 </div>
               )}
           </div>

@@ -1755,6 +1755,9 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus, i
         <p style="margin: 2px 0; color: black !important;">Data: ${new Date(order.createdAt).toLocaleString()}</p>
         <p style="margin: 2px 0; color: black !important;">Pedido: #${order.displayId || String(order.id || '').slice(0, 8)}</p>
         <p style="margin: 2px 0; color: black !important;">Cliente: ${order.customerName || 'Consumidor'}</p>
+        ${order.customerPhone ? `<p style="margin: 2px 0; color: black !important;">Telefone: ${order.customerPhone}</p>` : ''}
+        ${order.deliveryAddress ? `<p style="margin: 2px 0; color: black !important;">Endereço: ${order.deliveryAddress}</p>` : ''}
+        ${order.referencePoint ? `<p style="margin: 2px 0; color: black !important;">Ref: ${order.referencePoint}</p>` : ''}
         <div style="border-top: 2px dashed black; margin: 5px 0;"></div>
         ${order.items.map((item: any) => `
           <div style="display: flex; justify-content: space-between; margin: 1px 0; color: black !important;">

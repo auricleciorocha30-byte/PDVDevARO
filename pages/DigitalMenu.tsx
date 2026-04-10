@@ -123,8 +123,40 @@ const DigitalMenu: React.FC<Props> = ({ storeId, products, categories: externalC
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [referencePoint, setReferencePoint] = useState('');
   const [generatedDisplayId, setGeneratedDisplayId] = useState('');
+  const [isConsulting, setIsConsulting] = useState(false);
   
   const [activeWaitstaff, setActiveWaitstaff] = useState<Waitstaff | null>(null);
+
+  const handleConsultCustomer = async () => {
+      if (!customerPhone.trim() || !storeId) return;
+      setIsConsulting(true);
+      try {
+          const { data, error } = await supabase
+              .from('customers')
+              .select('*')
+              .eq('store_id', storeId)
+              .eq('phone', customerPhone.trim());
+              
+          if (data && data.length > 0) {
+              const customer = data[0];
+              setCustomerName(customer.name || '');
+              setDeliveryAddress(customer.address || '');
+              setReferencePoint(customer.referencePoint || '');
+              setCustomerId(customer.id);
+              setCustomerPoints(customer.points || 0);
+              alert('Cadastro encontrado! Dados preenchidos.');
+          } else {
+              alert('Nenhum cadastro encontrado para este telefone.');
+              setCustomerId(null);
+              setCustomerPoints(0);
+          }
+      } catch (err) {
+          console.error("Erro ao consultar cliente:", err);
+          alert('Erro ao consultar cadastro.');
+      } finally {
+          setIsConsulting(false);
+      }
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('gc-conveniencia-session-v1');
@@ -367,7 +399,7 @@ const DigitalMenu: React.FC<Props> = ({ storeId, products, categories: externalC
     let paymentDetailsArray: any[] = [];
 
     try {
-        if (orderType === 'ENTREGA' && customerPhone) {
+        if ((orderType === 'ENTREGA' || orderType === 'BALCAO') && customerPhone) {
             // Double check if customer exists to prevent duplicates
             const { data: existingCustomer } = await supabase
                 .from('customers')
@@ -376,14 +408,31 @@ const DigitalMenu: React.FC<Props> = ({ storeId, products, categories: externalC
                 .maybeSingle();
 
             if (existingCustomer) {
-                if (!existingCustomer.id) {
-                    const newId = crypto.randomUUID();
-                    await supabase.from('customers').eq('store_id', storeId).eq('phone', customerPhone.trim()).update({ id: newId });
-                    finalCustomerId = newId;
-                } else {
-                    finalCustomerId = existingCustomer.id;
+                finalCustomerId = existingCustomer.id;
+                
+                // Update customer data if changed
+                const updates: any = {};
+                let hasUpdates = false;
+                
+                if (customerName.trim() && existingCustomer.name !== customerName.trim()) {
+                    updates.name = customerName.trim();
+                    hasUpdates = true;
                 }
-            } else if (!finalCustomerId) {
+                if (orderType === 'ENTREGA') {
+                    if (deliveryAddress.trim() && existingCustomer.address !== deliveryAddress.trim()) {
+                        updates.address = deliveryAddress.trim();
+                        hasUpdates = true;
+                    }
+                    if (referencePoint.trim() && existingCustomer.referencePoint !== referencePoint.trim()) {
+                        updates.referencePoint = referencePoint.trim();
+                        hasUpdates = true;
+                    }
+                }
+                
+                if (hasUpdates) {
+                    await supabase.from('customers').eq('id', finalCustomerId).update(updates);
+                }
+            } else if (!finalCustomerId && customerName.trim()) {
                 // Create new customer
                 const newCustomerId = crypto.randomUUID();
                 const { data, error } = await supabase
@@ -393,7 +442,8 @@ const DigitalMenu: React.FC<Props> = ({ storeId, products, categories: externalC
                         store_id: storeId,
                         name: customerName.trim(),
                         phone: customerPhone.trim(),
-                        address: deliveryAddress.trim(),
+                        address: orderType === 'ENTREGA' ? deliveryAddress.trim() : undefined,
+                        referencePoint: orderType === 'ENTREGA' ? referencePoint.trim() : undefined,
                         points: 0,
                         isLoyaltyParticipant: true
                     }]);
@@ -781,24 +831,33 @@ const DigitalMenu: React.FC<Props> = ({ storeId, products, categories: externalC
                               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-4">
                                 Telefone (WhatsApp) {orderType !== 'ENTREGA' ? '(Opcional)' : ''}
                               </label>
-                              <div className="relative">
-                                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
-                                 <input 
-                                    type="tel" 
-                                    value={customerPhone} 
-                                    onChange={e => setCustomerPhone(e.target.value)} 
-                                    onBlur={e => {
-                                        let val = e.target.value.trim();
-                                        if (val && !val.startsWith('+55') && !val.startsWith('55')) {
-                                            val = '+55' + val;
-                                        } else if (val.startsWith('55')) {
-                                            val = '+' + val;
-                                        }
-                                        setCustomerPhone(val);
-                                    }}
-                                    className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold" 
-                                    placeholder="85 9..." 
-                                 />
+                              <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                                   <input 
+                                      type="tel" 
+                                      value={customerPhone} 
+                                      onChange={e => setCustomerPhone(e.target.value)} 
+                                      onBlur={e => {
+                                          let val = e.target.value.trim();
+                                          if (val && !val.startsWith('+55') && !val.startsWith('55')) {
+                                              val = '+55' + val;
+                                          } else if (val.startsWith('55')) {
+                                              val = '+' + val;
+                                          }
+                                          setCustomerPhone(val);
+                                      }}
+                                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none font-bold" 
+                                      placeholder="85 9..." 
+                                   />
+                                </div>
+                                <button 
+                                  onClick={handleConsultCustomer}
+                                  disabled={isConsulting || !customerPhone.trim()}
+                                  className="px-4 py-4 bg-blue-50 text-blue-600 rounded-2xl font-bold text-xs uppercase tracking-widest border border-blue-100 disabled:opacity-50"
+                                >
+                                  {isConsulting ? '...' : 'Consultar'}
+                                </button>
                               </div>
                            </div>
 

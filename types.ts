@@ -110,6 +110,7 @@ export interface Customer {
   name: string;
   phone: string;
   address?: string;
+  referencePoint?: string;
   cpf?: string;
   points: number;
   isLoyaltyParticipant?: boolean;

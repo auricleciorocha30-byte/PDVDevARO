@@ -311,6 +311,9 @@ async function ensureSchema() {
           if (!customerColumns.includes('address')) {
               try { await client.execute(`ALTER TABLE customers ADD COLUMN address TEXT`); } catch (e) { console.warn(e); }
           }
+          if (!customerColumns.includes('referencePoint')) {
+              try { await client.execute(`ALTER TABLE customers ADD COLUMN referencePoint TEXT`); } catch (e) { console.warn(e); }
+          }
       } catch (e) {
           console.warn("Migration check failed (safe to ignore if columns exist):", e);
       }
@@ -443,6 +446,9 @@ class TursoBridge {
             }
             if (!customerColumns.includes('address')) {
                 try { await this.executeSqlCustom(url, token, `ALTER TABLE customers ADD COLUMN address TEXT`); } catch (e) { console.warn(e); }
+            }
+            if (!customerColumns.includes('referencePoint')) {
+                try { await this.executeSqlCustom(url, token, `ALTER TABLE customers ADD COLUMN referencePoint TEXT`); } catch (e) { console.warn(e); }
             }
           } catch (e) {
              console.warn("Store Migration check failed:", e);
