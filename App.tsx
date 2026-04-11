@@ -567,9 +567,31 @@ function StoreContext() {
           setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
       } else {
           // For other statuses, just update normally
-          setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+          let updatePayload: any = { status };
+          
+          if ((status === 'ENTREGUE' || status === 'ENVIADO_PARA_ENTREGA') && !id.startsWith('local_')) {
+              // Check if there's an open POS session
+              let hasOpenSession = false;
+              if (currentStore?.id) {
+                  const { data: openSessions } = await supabase
+                      .from('register_sessions')
+                      .select('id')
+                      .eq('store_id', currentStore.id)
+                      .eq('status', 'OPEN')
+                      .gte('opened_at', Date.now() - 16 * 60 * 60 * 1000)
+                      .limit(1);
+                  hasOpenSession = openSessions && openSessions.length > 0;
+              }
+                  
+              if (!hasOpenSession) {
+                  // No open session. Set session_id to 'FECHADO' so it doesn't show as pending in POS.
+                  updatePayload.session_id = 'FECHADO';
+              }
+          }
+
+          setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updatePayload } : o));
           if (!id.startsWith('local_')) {
-              await supabase.from('orders').eq('id', id).update({ status });
+              await supabase.from('orders').eq('id', id).update(updatePayload);
           }
       }
     } finally {

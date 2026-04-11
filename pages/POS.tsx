@@ -300,16 +300,9 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus, i
 
         if (data && data.length > 0) {
             const unpaidData = data.filter(o => {
-                // If it has a session_id, it must be the current one and not delivered/canceled
-                if (o.session_id) {
-                    if (o.session_id !== currentSession?.id) return false;
-                    if (o.status === 'ENTREGUE' || o.status === 'CANCELADO') return false;
-                    return true;
-                }
-
-                // If it has no session_id, it's an open order (like a table or command)
-                // Hide if it's already delivered or canceled
-                if (o.status === 'ENTREGUE' || o.status === 'CANCELADO') {
+                if (o.session_id && o.session_id !== currentSession?.id) return false;
+                if (o.status === 'CANCELADO') return false;
+                if (o.status === 'ENTREGUE') {
                     let hasRealPayment = false;
                     if (o.paymentMethod && o.paymentMethod !== 'A_PAGAR') hasRealPayment = true;
                     if (o.paymentDetails) {
@@ -533,16 +526,9 @@ export default function POS({ storeId, user, settings, onLogout, updateStatus, i
 
         if (data && data.length > 0) {
             const unpaidData = data.filter(o => {
-                // If it has a session_id, it must be the current one and not delivered/canceled
-                if (o.session_id) {
-                    if (o.session_id !== currentSession?.id) return false;
-                    if (o.status === 'ENTREGUE' || o.status === 'CANCELADO') return false;
-                    return true;
-                }
-
-                // If it has no session_id, it's an open order (like a table or command)
-                // Hide if it's already delivered or canceled
-                if (o.status === 'ENTREGUE' || o.status === 'CANCELADO') {
+                if (o.session_id && o.session_id !== currentSession?.id) return false;
+                if (o.status === 'CANCELADO') return false;
+                if (o.status === 'ENTREGUE') {
                     let hasRealPayment = false;
                     if (o.paymentMethod && o.paymentMethod !== 'A_PAGAR') hasRealPayment = true;
                     if (o.paymentDetails) {

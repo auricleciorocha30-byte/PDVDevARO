@@ -53,10 +53,32 @@ const StoreSettingsPage: React.FC<Props> = ({ settings, products, onSave, storeI
   const [isImporting, setIsImporting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [productSearch, setProductSearch] = useState('');
+  const [isClosingSessions, setIsClosingSessions] = useState(false);
 
   useEffect(() => {
     setLocalSettings(settings);
   }, [settings]);
+
+  const handleCloseStuckSessions = async () => {
+      if (!storeId) return;
+      if (!window.confirm("Tem certeza que deseja encerrar todas as sessões de caixa abertas? Isso forçará o fechamento de qualquer PDV que tenha esquecido de fechar o caixa.")) return;
+      
+      setIsClosingSessions(true);
+      try {
+          const { error } = await supabase
+              .from('register_sessions')
+              .update({ status: 'CLOSED', closed_at: Date.now() })
+              .eq('store_id', storeId)
+              .eq('status', 'OPEN');
+              
+          if (error) throw error;
+          alert("Todas as sessões abertas foram encerradas com sucesso.");
+      } catch (err: any) {
+          alert("Erro ao encerrar sessões: " + err.message);
+      } finally {
+          setIsClosingSessions(false);
+      }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -375,6 +397,19 @@ const StoreSettingsPage: React.FC<Props> = ({ settings, products, onSave, storeI
                   checked={localSettings.isCashbackActive === true} 
                   onChange={(checked) => setLocalSettings({...localSettings, isCashbackActive: checked})} 
                 />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-red-700">Encerrar Sessões Travadas</span>
+                  <span className="text-[10px] text-red-500">Força o fechamento de todos os caixas abertos.</span>
+                </div>
+                <button 
+                  onClick={handleCloseStuckSessions}
+                  disabled={isClosingSessions}
+                  className="px-3 py-1.5 bg-red-600 text-white rounded-lg text-[10px] font-bold hover:bg-red-700 transition-colors disabled:opacity-50"
+                >
+                  {isClosingSessions ? 'Encerrando...' : 'Encerrar Todos'}
+                </button>
               </div>
               {localSettings.isCashbackActive && (
                 <div className="space-y-3">
